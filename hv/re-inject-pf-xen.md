@@ -225,6 +225,32 @@ TBD
 ページフォールトは違うので格納されない．  
 
 次に，`__vmx_inject_exception`が実行される．  
+```C
+static void __vmx_inject_exception(int trap, int type, int error_code)
+{
+    unsigned long intr_fields;
+    struct vcpu *curr = current;
+
+    /*
+     * NB. Callers do not need to worry about clearing STI/MOV-SS blocking:
+     *  "If the VM entry is injecting, there is no blocking by STI or by
+     *   MOV SS following the VM entry, regardless of the contents of the
+     *   interruptibility-state field [in the guest-state area before the
+     *   VM entry]", PRM Vol. 3, 22.6.1 (Interruptibility State).
+     */
+
+    intr_fields = INTR_INFO_VALID_MASK |
+                  MASK_INSR(type, INTR_INFO_INTR_TYPE_MASK) |
+                  MASK_INSR(trap, INTR_INFO_VECTOR_MASK);
+    if ( error_code != X86_EVENT_NO_EC )
+    {
+        __vmwrite(VM_ENTRY_EXCEPTION_ERROR_CODE, error_code);
+        intr_fields |= INTR_INFO_DELIVER_CODE_MASK;
+    }
+
+    __vmwrite(VM_ENTRY_INTR_INFO, intr_fields);
+}
+```
 TBD  
 
 最後に，`HVMTRACE_LONG_2D`が実行される．
