@@ -73,7 +73,6 @@ static struct hvm_function_table __initdata vmx_function_table = {
 このようにただの関数のテーブルであるが，目的の`inject_event`の実態は`vmx_inject_event`であることがわかる．
 
 ## inject_event関数
-TBD
 ```C
 /*
  * Generate a virtual event in the guest.
@@ -124,10 +123,10 @@ static void vmx_inject_event(const struct x86_event *event)
         curr->arch.hvm_vcpu.guest_cr[2] = _event.cr2;
         break;
     }
-
+    /*
     if ( nestedhvm_vcpu_in_guestmode(curr) )
         intr_info = vcpu_2_nvmx(curr).intr.intr_info;
-    else
+    else*/
         __vmread(VM_ENTRY_INTR_INFO, &intr_info);
 
     if ( unlikely(intr_info & INTR_INFO_VALID_MASK) &&
@@ -139,10 +138,10 @@ static void vmx_inject_event(const struct x86_event *event)
         if ( _event.vector == TRAP_double_fault )
             _event.error_code = 0;
     }
-
+    /*
     if ( _event.type >= X86_EVENTTYPE_SW_INTERRUPT )
         __vmwrite(VM_ENTRY_INSTRUCTION_LEN, _event.insn_len);
-
+    
     if ( nestedhvm_vcpu_in_guestmode(curr) &&
          nvmx_intercepts_exception(curr, _event.vector, _event.error_code) )
     {
@@ -153,14 +152,76 @@ static void vmx_inject_event(const struct x86_event *event)
             _event.error_code, hvm_intsrc_none);
         return;
     }
-    else
+    else*/
         __vmx_inject_exception(_event.vector, _event.type, _event.error_code);
 
     if ( (_event.vector == TRAP_page_fault) &&
          (_event.type == X86_EVENTTYPE_HW_EXCEPTION) )
         HVMTRACE_LONG_2D(PF_INJECT, _event.error_code,
                          TRC_PAR_LONG(curr->arch.hvm_vcpu.guest_cr[2]));
+/*
     else
-        HVMTRACE_2D(INJ_EXC, _event.vector, _event.error_code);
+        HVMTRACE_2D(INJ_EXC, _event.vector, _event.error_code);*/
 }
 ```
+最初のswitch-caseで`TRAP_page_fault`に行き，
+```C
+curr->arch.hvm_vcpu.guest_cr[2] = _event.cr2;
+```
+で，VCPUのCR2にトラップ時のcr2の値が格納される．  
+次に，Bareflankでの`vm_entry_interruption_information`を読み出す．(`vmread`命令を直接叩いているが，xenにはvmcs情報が保存されていないのか……)
+これはintelの仕様書を読むよりもbareflankのコードを読むほうが構造化されており把握しやすいので参照してください．  
+`intr_info`に割り込みの情報が保存される．  
+次に，`valid_bit`が立っていて，ハードウェアエクセプションタイプならば，下記のコードが実行される．  
+`valid_bit`の指すところがいまいち把握できていないが，bareflankで起こったページフォールトを確認すると，`valid_bit`は`false`だった．  
+ので実行されない？[!要確認!]
+```C
+_event.vector = hvm_combine_hw_exceptions(
+    (uint8_t)intr_info, _event.vector);
+if ( _event.vector == TRAP_double_fault )
+    _event.error_code = 0;
+```
+`hvm_combine_hw_exceptions`関数は
+```C
+/*
+ * Combine two hardware exceptions: @vec2 was raised during delivery of @vec1.
+ * This means we can assume that @vec2 is contributory or a page fault.
+ */
+uint8_t hvm_combine_hw_exceptions(uint8_t vec1, uint8_t vec2)
+{
+    const unsigned int contributory_exceptions =
+        (1 << TRAP_divide_error) |
+        (1 << TRAP_invalid_tss) |
+        (1 << TRAP_no_segment) |
+        (1 << TRAP_stack_error) |
+        (1 << TRAP_gp_fault);
+    const unsigned int page_faults =
+        (1 << TRAP_page_fault) |
+        (1 << TRAP_virtualisation);
+
+    /* Exception during double-fault delivery always causes a triple fault. */
+    if ( vec1 == TRAP_double_fault )
+    {
+        hvm_triple_fault();
+        return TRAP_double_fault; /* dummy return */
+    }
+
+    /* Exception during page-fault delivery always causes a double fault. */
+    if ( (1u << vec1) & page_faults )
+        return TRAP_double_fault;
+
+    /* Discard the first exception if it's benign or if we now have a #PF. */
+    if ( !((1u << vec1) & contributory_exceptions) ||
+         ((1u << vec2) & page_faults) )
+        return vec2;
+
+    /* Cannot combine the exceptions: double fault. */
+    return TRAP_double_fault;
+}
+```
+次に，ソフトウェアエクセプション，ICEBP，INT3 (CC), INTO (CE)ならばBareflankでいうところの`vm_entry_instruction_length`に命令の長さが格納される．  
+ページフォールトは違うので格納されない．  
+最後に，`HVMTRACE_LONG_2D`が実行される．
+
+### HVMTRACE_LONG_2D
+TBD
