@@ -73,6 +73,7 @@ static struct hvm_function_table __initdata vmx_function_table = {
 このようにただの関数のテーブルであるが，目的の`inject_event`の実態は`vmx_inject_event`であることがわかる．
 
 ## inject_event関数
+TBD
 ```C
 /*
  * Generate a virtual event in the guest.
@@ -161,43 +162,5 @@ static void vmx_inject_event(const struct x86_event *event)
                          TRC_PAR_LONG(curr->arch.hvm_vcpu.guest_cr[2]));
     else
         HVMTRACE_2D(INJ_EXC, _event.vector, _event.error_code);
-}
-
-static int vmx_event_pending(struct vcpu *v)
-{
-    unsigned long intr_info;
-
-    ASSERT(v == current);
-    __vmread(VM_ENTRY_INTR_INFO, &intr_info);
-
-    return intr_info & INTR_INFO_VALID_MASK;
-}
-
-static void vmx_set_info_guest(struct vcpu *v)
-{
-    unsigned long intr_shadow;
-
-    vmx_vmcs_enter(v);
-
-    __vmwrite(GUEST_DR7, v->arch.debugreg[7]);
-
-    /* 
-     * If the interruptibility-state field indicates blocking by STI,
-     * setting the TF flag in the EFLAGS may cause VM entry to fail
-     * and crash the guest. See SDM 3B 22.3.1.5.
-     * Resetting the VMX_INTR_SHADOW_STI flag looks hackish but
-     * to set the GUEST_PENDING_DBG_EXCEPTIONS.BS here incurs
-     * immediately vmexit and hence make no progress.
-     */
-    __vmread(GUEST_INTERRUPTIBILITY_INFO, &intr_shadow);
-    if ( v->domain->debugger_attached &&
-         (v->arch.user_regs.eflags & X86_EFLAGS_TF) &&
-         (intr_shadow & VMX_INTR_SHADOW_STI) )
-    {
-        intr_shadow &= ~VMX_INTR_SHADOW_STI;
-        __vmwrite(GUEST_INTERRUPTIBILITY_INFO, intr_shadow);
-    }
-
-    vmx_vmcs_exit(v);
 }
 ```
