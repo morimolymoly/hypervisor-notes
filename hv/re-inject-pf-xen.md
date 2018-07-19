@@ -222,6 +222,4 @@ uint8_t hvm_combine_hw_exceptions(uint8_t vec1, uint8_t vec2)
 次に，ソフトウェアエクセプション，ICEBP，INT3 (CC), INTO (CE)ならばBareflankでいうところの`vm_entry_instruction_length`に命令の長さが格納される．  
 ページフォールトは違うので格納されない．  
 最後に，`HVMTRACE_LONG_2D`が実行される．
-
-### HVMTRACE_LONG_2D
-TBD
+これは`__trace_var`を内部で呼び出していて，trace bufferに書き込むための関数である．デバッグ用？？
