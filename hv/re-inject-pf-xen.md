@@ -172,9 +172,9 @@ curr->arch.hvm_vcpu.guest_cr[2] = _event.cr2;
 次に，Bareflankでの`vm_entry_interruption_information`を読み出す．(`vmread`命令を直接叩いているが，xenにはvmcs情報が保存されていないのか……)
 これはintelの仕様書を読むよりもbareflankのコードを読むほうが構造化されており把握しやすいので参照してください．  
 `intr_info`に割り込みの情報が保存される．  
-次に，`valid_bit`が立っていて，ハードウェアエクセプションタイプならば，下記のコードが実行される．  
+次に，`valid_bit`が`false`で，ハードウェアエクセプションタイプならば，下記のコードが実行される．  
 `valid_bit`の指すところがいまいち把握できていないが，bareflankで起こったページフォールトを確認すると，`valid_bit`は`false`だった．  
-ので実行されない？[!要確認!]
+したがって，下記のコードが実行される．
 ```C
 _event.vector = hvm_combine_hw_exceptions(
     (uint8_t)intr_info, _event.vector);
@@ -219,7 +219,13 @@ uint8_t hvm_combine_hw_exceptions(uint8_t vec1, uint8_t vec2)
     return TRAP_double_fault;
 }
 ```
+TBD  
+
 次に，ソフトウェアエクセプション，ICEBP，INT3 (CC), INTO (CE)ならばBareflankでいうところの`vm_entry_instruction_length`に命令の長さが格納される．  
 ページフォールトは違うので格納されない．  
+
+次に，`__vmx_inject_exception`が実行される．  
+TBD  
+
 最後に，`HVMTRACE_LONG_2D`が実行される．
 これは`__trace_var`を内部で呼び出していて，trace bufferに書き込むための関数である．デバッグ用？？
