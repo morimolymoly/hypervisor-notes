@@ -1,5 +1,6 @@
 # xenでのpage faultのre-injection手法
-Xenでのページフォールトの再挿入方法をコールドリーディングにより紐解く．
+Xenでのページフォールトの再挿入方法をコードリーディングにより紐解く．  
+一言で言えば，`vm_entry_interruption_information`を設定し，インジェクションを行う．
 
 ## エントリポイント
 まずは`xen/xen/include/asm-x86/hvm/hvm.h`の中にある`hvm_inject_page_fault`関数に注目する．  
@@ -226,6 +227,8 @@ TBD
 
 次に，`__vmx_inject_exception`が実行される．  
 ```C
+#define MASK_INSR(v, m) (((v) * ((m) & -(m))) & (m))
+
 static void __vmx_inject_exception(int trap, int type, int error_code)
 {
     unsigned long intr_fields;
