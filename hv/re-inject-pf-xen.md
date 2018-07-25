@@ -170,7 +170,7 @@ static void vmx_inject_event(const struct x86_event *event)
 curr->arch.hvm_vcpu.guest_cr[2] = _event.cr2;
 ```
 で，VCPUのCR2にトラップ時のcr2の値が格納される．  
-次に，Bareflankでの`vm_entry_interruption_information`を読み出す．(`vmread`命令を直接叩いているが，xenにはvmcs情報が保存されていないのか……)
+次に，Bareflankでの`vm_entry_interruption_information`を読み出す．(`vmread`命令を直接叩いている．隠蔽しようとかならなかったわけ？)
 これはintelの仕様書を読むよりもbareflankのコードを読むほうが構造化されており把握しやすいので参照してください．  
 `intr_info`に割り込みの情報が保存される．  
 次に，`valid_bit`が`false`で，ハードウェアエクセプションタイプならば，下記のコードが実行される．  
@@ -182,6 +182,7 @@ _event.vector = hvm_combine_hw_exceptions(
 if ( _event.vector == TRAP_double_fault )
     _event.error_code = 0;
 ```
+
 `hvm_combine_hw_exceptions`関数は
 ```C
 /*
@@ -220,7 +221,8 @@ uint8_t hvm_combine_hw_exceptions(uint8_t vec1, uint8_t vec2)
     return TRAP_double_fault;
 }
 ```
-TBD  
+これはトラップしたイベントと挿入したいイベントとで競合が発生するときに，融合させる関数．  
+TODO:知見はコードにまとまっているが，解説する
 
 次に，ソフトウェアエクセプション，ICEBP，INT3 (CC), INTO (CE)ならばBareflankでいうところの`vm_entry_instruction_length`に命令の長さが格納される．  
 ページフォールトは違うので格納されない．  
@@ -254,7 +256,7 @@ static void __vmx_inject_exception(int trap, int type, int error_code)
     __vmwrite(VM_ENTRY_INTR_INFO, intr_fields);
 }
 ```
-TBD  
+この関数で行うことは，エラーコードが必要ならそれを書き込み，valid_bitを立てて，イベントタイプとベクター番号を設定している．挿入の要のコード．
 
 最後に，`HVMTRACE_LONG_2D`が実行される．
-これは`__trace_var`を内部で呼び出していて，trace bufferに書き込むための関数である．デバッグ用？？
+これは`__trace_var`を内部で呼び出していて，trace buffer(デバッグ用)に書き込むための関数である．
