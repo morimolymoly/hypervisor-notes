@@ -1,4 +1,5 @@
-# vm_entry_interruption_information
+# 例外のインジェクションに関わるVMCSについて
+## vm_entry_interruption_information
 `vm_entry_interruption_information`には，以下の項目がある．
 * vector ベクター
     * ただの例外番号
@@ -20,10 +21,10 @@
     * このbitがたっているときのみ，インジェクションが起こる
     * 毎回フラッシュされる
 
-# vm entry exception error code
+## vm entry exception error code
 exceptionのエラーコード.
 PageFaultならPFEC(Page Fault Error Code)
 
-# vm entry instruction length
+## vm entry instruction length
 命令の長さを格納する．  
 そのぶんRIPが進む．
