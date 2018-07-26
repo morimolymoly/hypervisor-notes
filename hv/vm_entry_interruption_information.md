@@ -13,12 +13,8 @@
         * privileged_software_exception = 5ULL;
         * software_exception = 6ULL;
 * deliver_error_code_bit
-    * error codeが格納される
-    * page faultならPFEC(Page Fault Error Code)
-    * TBD
-* error_code_valid
-    * deliver_error_code_bitを有効にするを設定する
+    * エラーコードをスタックに積むかどうかをきめる
 * reserved
     * TBD
 * valid_bit
-    * TBD
+    * このbitがたっているときのみ，インジェクションが起こる
