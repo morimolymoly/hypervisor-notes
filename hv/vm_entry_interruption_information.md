@@ -18,3 +18,12 @@
     * TBD
 * valid_bit
     * このbitがたっているときのみ，インジェクションが起こる
+    * 毎回フラッシュされる
+
+# vm entry exception error code
+exceptionのエラーコード.
+PageFaultならPFEC(Page Fault Error Code)
+
+# vm entry instruction length
+命令の長さを格納する．  
+そのぶんRIPが進む．
