@@ -9,6 +9,7 @@ There are lots of  document in “Japanese”!
 * [ネットワークドライバらへん](hv/nw_driver.md)
 * [virtio](hv/virtio.md)
 * [Bitvisorのネットワークドライバ](bitvisor/nw_driver.md)
+* [Bitvisorのpro1000(ippass)](bitvisor/pro1000_ippass.md)
 
 ## LICENSE
 MIT
