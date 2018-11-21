@@ -1,6 +1,8 @@
 # memo
 various memo.  
 There are lots of  document in “Japanese”!  
+* [仮想化概要](./misc/virtualization.md)
+* [KVMとは](./misc/kvm.md)
 * [WIP:RE-injection of page-fault on xen](hv/re-inject-pf-xen.md)
 * [VMCS's fields related to exception injection](hv/injection-vmcs.md)
 * [WIP:How to re-inject event](hv/how-to-re-inject-event.md)
