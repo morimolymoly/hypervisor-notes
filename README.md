@@ -21,6 +21,7 @@ There are lots of  document in “Japanese”!
 * [BitVisorのpro1000(ippass)](bitvisor/pro1000_ippass.md)
 * [BitVisorのエントリポイントらへん](bitvisor/vmm_main.md)
 * [defconfig](bitvisor/defconfig.md)
+* [MMIO](bitvisor/mmio.md)
 
 ## LICENSE
 MIT
