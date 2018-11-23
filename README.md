@@ -22,6 +22,7 @@ There are lots of  document in “Japanese”!
 * [BitVisorのエントリポイントらへん](bitvisor/vmm_main.md)
 * [defconfig](bitvisor/defconfig.md)
 * [MMIO](bitvisor/mmio.md)
+* [INT3トラップしてNICのレジスタをダンプするやつ](https://github.com/morimolymoly/pro1000bitvisor)
 
 ## LICENSE
 MIT
