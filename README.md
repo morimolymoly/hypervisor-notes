@@ -20,6 +20,7 @@ There are lots of  document in “Japanese”!
 * [BitVisorのネットワークドライバ](bitvisor/nw_driver.md)
 * [BitVisorのpro1000(ippass)](bitvisor/pro1000_ippass.md)
 * [BitVisorのエントリポイントらへん](bitvisor/vmm_main.md)
+* [defconfig](bitvisor/defconfig.md)
 
 ## LICENSE
 MIT

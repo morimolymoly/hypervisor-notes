@@ -1,4 +1,48 @@
 # pro1000 ippass
+
+## 構造体
+ディスクリプタリングはみたまんまね
+### data
+dataは6っこ確保される．BARに対応している．
+* i - BARの番号
+* e - dirty bit?
+* io - ioかどうか
+* hd - ハンドルするI/Oポート番号
+* disable - 有効ならずっとtrue
+* h - mmio_handle構造体のポインタ[MMIO参照](./mmio.md)
+* map - MMIO領域のホストのアドレス(mapmem_gphys関数でマップされる)
+* maplen - 長さ
+* mapaddr - BARのアドレス(ゲストの物理アドレス(一応だがこれバスアドレスな))
+* d - data2へのポインタ
+
+### data2
+* spinlock_t lock - ロック
+* u8 *buf
+* long buf_premap
+* uint len
+* bool dext1_ixsm, dext1_txsm
+* uint dext0_tucss, dext0_tucso, dext0_tucse
+* uint dext0_ipcss, dext0_ipcso, dext0_ipcse
+* uint dext0_mss, dext0_hdrlen, dext0_paylen, dext0_ip, dext0_tcp
+* bool tse_first, tse_tcpfin, tse_tcppsh
+* u16 tse_iplen, tse_ipchecksum, tse_tcpchecksum
+* struct desc_shadow tdesc[2], rdesc[2]
+* struct data *d1 - data構造体のポインタ(data*6の配列になってる)
+* struct netdata *nethandle
+* bool initialized
+* net_recv_callback_t *recvphys_func, *recvvirt_func
+* void *recvphys_param, *recvvirt_param
+* u32 rctl, rfctl, tctl
+* u8 macaddr[6] - MACアドレス
+* struct pci_device *pci_device
+* u32 regs_at_init[PCI_CONFIG_REGS32_NUM]
+* bool seize - vitioとかttyで使うとき(BitVisorが完全にNICを掌握するときってことかな)
+* bool conceal
+* LIST1_DEFINE (struct data2)
+* void *virtio_net
+* char virtio_net_bar_emul
+* struct pci_msi *virtio_net_msi
+
 ## 初期化
 `PCI_DRIVER_INIT (vpn_pro1000_init);`でドライバ起動．  
 `vpn_pro1000_init`がよばれる．  
