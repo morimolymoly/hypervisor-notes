@@ -11,6 +11,9 @@ There are lots of  document in “Japanese”!
 * [ネットワークドライバらへん](hv/nw_driver.md)
 * [virtio](hv/virtio.md)
 
+# Exploit
+* [WIP:VM escape - QEMU Case Study(PhrackMagazine)](./exploit/vm-escape-qemu-case-study.md)
+
 # Xen
 * [WIP:RE-injection of page-fault on xen](hv/re-inject-pf-xen.md)
 * [Poem about xen when I create original hypervisor for fun](hv/poem-about-xen.md)
