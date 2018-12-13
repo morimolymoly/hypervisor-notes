@@ -26,6 +26,7 @@ There are lots of  document in “Japanese”!
 * [defconfig](bitvisor/defconfig.md)
 * [MMIO](bitvisor/mmio.md)
 * [INT3トラップしてNICのレジスタをダンプするやつ](https://github.com/morimolymoly/pro1000bitvisor)
+* [EPT](bitvisor/ept.md)
 
 ## LICENSE
 MIT
